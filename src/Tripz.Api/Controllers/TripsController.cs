@@ -110,6 +110,44 @@ namespace Tripz.Api.Controllers
             return CreatedAtAction(nameof(GetTripById), new { id = createdTrip.Id }, createdTrip);
         }
 
+        /// <summary>
+        /// Approve or reject a trip reimbursement request.
+        /// Allows managers to approve (status=2) or reject (status=3) a submitted trip.
+        /// </summary>
+        /// <param name="id">The trip ID</param>
+        /// <param name="request">Approval decision and optional reason</param>
+        /// <returns>The updated trip details</returns>
+        /// <response code="200">Trip successfully approved or rejected</response>
+        /// <response code="400">Invalid status or trip cannot be approved</response>
+        /// <response code="404">Trip not found</response>
+        [HttpPatch("{id}/approve")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        // [Authorize(Roles = "Manager")] // TODO: Uncomment when authentication is implemented
+        public async Task<IActionResult> ApproveTrip(Guid id, [FromBody] ApproveTripRequest request)
+        {
+            var command = new ApproveTripCommand
+            {
+                TripId = id,
+                Status = (TripStatus)request.Status,
+                Reason = request.Reason
+            };
+
+            try
+            {
+                var updatedTrip = await _tripService.ApproveTripAsync(command);
+
+                if (updatedTrip == null)
+                    return NotFound();
+
+                return Ok(updatedTrip);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            }
         [HttpGet("employee")]
         public async Task<IActionResult> GetTripsForEmployee([FromQuery] int userId)
         {

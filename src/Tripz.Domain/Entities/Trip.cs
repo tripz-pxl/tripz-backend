@@ -15,6 +15,7 @@ namespace Tripz.Domain.Entities
         public string Purpose { get; set; } = string.Empty;
         public decimal EstimatedCost { get; set; }
         public TripStatus Status { get; set; }
+        public string? Reason { get; set; }
         public DateTime SubmittedAt { get; set; }
     }
 }
