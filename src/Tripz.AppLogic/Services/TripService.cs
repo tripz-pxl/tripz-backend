@@ -146,6 +146,7 @@ namespace Tripz.AppLogic.Services
                 SubmittedAt = trip.SubmittedAt
             };
         }
+
         public async Task<IEnumerable<TripDto>> GetTripsForEmployeeAsync(int employeeId)
         {
             var trips = await _tripRepository.GetTripsForEmployeeAsync(employeeId);
@@ -164,6 +165,5 @@ namespace Tripz.AppLogic.Services
                 SubmittedAt = t.SubmittedAt
             });
         }
-
     }
 }

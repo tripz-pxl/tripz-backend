@@ -147,7 +147,8 @@ namespace Tripz.Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            }
+        }
+
         [HttpGet("employee")]
         public async Task<IActionResult> GetTripsForEmployee([FromQuery] int userId)
         {
