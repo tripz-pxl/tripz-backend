@@ -11,6 +11,7 @@
         public string Destination { get; set; } = string.Empty;
         public decimal EstimatedCost { get; set; }
         public string Status { get; set; } = string.Empty;
+        public string? Reason { get; set; }
         public DateTime SubmittedAt { get; set; }
     }
 }

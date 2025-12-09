@@ -63,7 +63,7 @@ namespace Tripz.AppLogic.Services
         public async Task<TripDto?> GetTripByIdAsync(Guid id)
         {
             var trip = await _tripRepository.GetTripByIdAsync(id);
-            
+
             if (trip == null)
                 return null;
 
@@ -116,6 +116,37 @@ namespace Tripz.AppLogic.Services
             };
         }
 
+        public async Task<TripDto?> ApproveTripAsync(ApproveTripCommand command)
+        {
+            var trip = await _tripRepository.GetTripByIdAsync(command.TripId);
+
+            if (trip == null)
+                return null;
+
+            if (trip.Status != TripStatus.Submitted)
+                throw new InvalidOperationException("Only submitted trips can be approved or rejected.");
+
+            trip.Status = command.Status;
+            trip.Reason = command.Reason;
+
+            await _tripRepository.UpdateTripAsync(trip);
+
+            return new TripDto
+            {
+                Id = trip.Id,
+                EmployeeId = trip.User.Id.ToString(),
+                EmployeeName = trip.User.Nickname,
+                TransportType = trip.TransportType.ToString(),
+                DepartureDate = trip.DepartureDate,
+                ReturnDate = trip.ReturnDate,
+                Destination = trip.Destination,
+                EstimatedCost = trip.EstimatedCost,
+                Status = trip.Status.ToString(),
+                Reason = trip.Reason,
+                SubmittedAt = trip.SubmittedAt
+            };
+        }
+
         public async Task<IEnumerable<TripDto>> GetTripsForEmployeeAsync(int employeeId)
         {
             var trips = await _tripRepository.GetTripsForEmployeeAsync(employeeId);
@@ -134,6 +165,5 @@ namespace Tripz.AppLogic.Services
                 SubmittedAt = t.SubmittedAt
             });
         }
-
     }
 }

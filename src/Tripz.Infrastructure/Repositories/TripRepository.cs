@@ -50,10 +50,10 @@ namespace Tripz.Infrastructure.Repositories
         {
             _context.Trips.Add(trip);
             await _context.SaveChangesAsync();
-            
+
             // Load the User navigation property after creation
             await _context.Entry(trip).Reference(t => t.User).LoadAsync();
-            
+
             return trip;
         }
 
@@ -64,6 +64,12 @@ namespace Tripz.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
+        public async Task UpdateTripAsync(Trip trip)
+        {
+            _context.Trips.Update(trip);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<Trip>> GetTripsForEmployeeAsync(int employeeId)
         {
             return await _context.Trips
@@ -72,6 +78,5 @@ namespace Tripz.Infrastructure.Repositories
                 .OrderByDescending(t => t.SubmittedAt)
                 .ToListAsync();
         }
-
     }
 }

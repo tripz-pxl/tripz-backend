@@ -10,5 +10,6 @@ namespace Tripz.AppLogic.Services
         Task<IEnumerable<TripDto>> GetTripsForEmployeeAsync(int employeeId);
         Task<TripDto> CreateTripAsync(CreateTripCommand command);
         Task<TripDto?> GetTripByIdAsync(Guid id);
+        Task<TripDto?> ApproveTripAsync(ApproveTripCommand command);
     }
 }
