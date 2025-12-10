@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Tripz.AppLogic;
 using Tripz.AppLogic.Services;
@@ -15,18 +16,17 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:5173",
-                "https://brave-rock-0a3ba2c03.3.azurestaticapps.net"
-            )
+        policy.WithOrigins("http://localhost:5173")
             .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+            .AllowAnyHeader();
     });
 });
 
 // Add Swagger/Swashbuckle
-builder.Services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new() { Title = "Tripz API", Version = "v1" }); });
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "Tripz API", Version = "v1" });
+});
 
 // Configure in-memory database
 builder.Services.AddDbContext<TripzDbContext>(options =>
@@ -51,7 +51,7 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-
+    
     // Enable Swagger UI
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -66,9 +66,8 @@ app.UseHttpsRedirection();
 // Use CORS
 app.UseCors("AllowFrontend");
 
-// TODO: Uncomment when authentication is implemented
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
