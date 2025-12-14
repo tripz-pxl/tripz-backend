@@ -6,6 +6,7 @@
         Train = 2,
         Plane = 3,
         Bus = 4,
-        Other = 5
+        Bike = 5,
+        Other = 6
     }
 }

@@ -11,5 +11,6 @@ namespace Tripz.AppLogic.Services
         Task<TripDto> CreateTripAsync(CreateTripCommand command);
         Task<TripDto?> GetTripByIdAsync(Guid id);
         Task<TripDto?> ApproveTripAsync(ApproveTripCommand command);
+        Task<ReimbursementSummaryDto> GetReimbursementSummaryAsync(GetTripsQuery query);
     }
 }

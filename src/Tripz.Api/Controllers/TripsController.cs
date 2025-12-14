@@ -155,5 +155,26 @@ namespace Tripz.Api.Controllers
             var trips = await _tripService.GetTripsForEmployeeAsync(userId);
             return Ok(trips);
         }
+
+        /// <summary>
+        /// Get a summary of reimbursements.
+        /// </summary>
+        /// <param name="request">Filter parameters</param>
+        /// <returns>Reimbursement summary</returns>
+        [HttpGet("summary")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetReimbursementSummary([FromQuery] GetTripsRequest request)
+        {
+            var query = new GetTripsQuery
+            {
+                EmployeeId = request.EmployeeId,
+                TransportType = request.TransportType,
+                Month = request.Month,
+                Year = request.Year
+            };
+
+            var summary = await _tripService.GetReimbursementSummaryAsync(query);
+            return Ok(summary);
+        }
     }
 }

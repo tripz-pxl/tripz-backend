@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Tripz.Domain.Enums;
 
 namespace Tripz.Api.Models
 {
@@ -6,7 +7,7 @@ namespace Tripz.Api.Models
     {
         public string? EmployeeId { get; set; }
 
-        [Range(1, 5, ErrorMessage = "Transport type must be between 1 and 5")]
+        [EnumDataType(typeof(TransportType), ErrorMessage = "Transport type must be a valid value")]
         public int? TransportType { get; set; }
 
         [Range(1, 12, ErrorMessage = "Month must be between 1 and 12")]
