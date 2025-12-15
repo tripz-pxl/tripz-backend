@@ -2,6 +2,7 @@
 using Tripz.AppLogic.DTOs;
 using Tripz.AppLogic.Queries;
 using Tripz.Domain.Enums;
+using Tripz.Domain.State;
 
 namespace Tripz.AppLogic.Services
 {
@@ -73,11 +74,18 @@ namespace Tripz.AppLogic.Services
             if (trip == null)
                 return null;
 
-            if (trip.Status != TripStatus.Submitted)
-                throw new InvalidOperationException("Only submitted trips can be approved or rejected.");
-
-            trip.Status = command.Status;
-            trip.Reason = command.Reason;
+            if (command.Status == TripStatus.Approved)
+            {
+                trip.Approve();
+            }
+            else if (command.Status == TripStatus.Rejected)
+            {
+                trip.Reject(command.Reason);
+            }
+            else
+            {
+                throw new InvalidOperationException("Invalid status for approval action.");
+            }
 
             await _tripRepository.UpdateTripAsync(trip);
 
