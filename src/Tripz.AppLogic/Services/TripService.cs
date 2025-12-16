@@ -173,5 +173,58 @@ namespace Tripz.AppLogic.Services
                 SubmittedAt = t.SubmittedAt
             });
         }
+
+        public async Task<ReimbursementSummaryDto> GetReimbursementSummaryAsync(GetTripsQuery query)
+        {
+            var trips = await _tripRepository.GetTripsAsync(query);
+
+            // Ensure filters are applied even if repository ignored them
+            var filtered = trips.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(query.EmployeeId))
+            {
+                filtered = filtered.Where(t =>
+                    string.Equals(t.User.Id.ToString(), query.EmployeeId, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (query.TransportType.HasValue)
+            {
+                filtered = filtered.Where(t => (int)t.TransportType == query.TransportType.Value);
+            }
+            if (query.Month.HasValue)
+            {
+                filtered = filtered.Where(t => t.DepartureDate.Month == query.Month.Value);
+            }
+            if (query.Year.HasValue)
+            {
+                filtered = filtered.Where(t => t.DepartureDate.Year == query.Year.Value);
+            }
+
+            var tripList = filtered.ToList();
+
+            // build DTO
+            var summary = new ReimbursementSummaryDto();
+            foreach (var trip in tripList)
+            {
+                var amount = ReimbursementCalculator.Calculate(trip);
+                summary.TotalReimbursement += amount;
+
+                var monthKey = $"{trip.DepartureDate.Year}-{trip.DepartureDate.Month:D2}";
+                if (!summary.ByMonth.ContainsKey(monthKey))
+                {
+                    summary.ByMonth[monthKey] = 0;
+                }
+                summary.ByMonth[monthKey] += amount;
+
+                var typeKey = trip.TransportType.ToString();
+                if (!summary.ByTransportType.ContainsKey(typeKey))
+                {
+                    summary.ByTransportType[typeKey] = 0;
+                }
+                summary.ByTransportType[typeKey] += amount;
+            }
+
+            return summary;
+        }
     }
 }
