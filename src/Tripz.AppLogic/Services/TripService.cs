@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
-using Tripz.AppLogic.Commands;
+﻿using Tripz.AppLogic.Commands;
 using Tripz.AppLogic.DTOs;
 using Tripz.AppLogic.Queries;
-using Tripz.Domain.Entities;
 using Tripz.Domain.Enums;
 using Tripz.Domain.State;
 
@@ -12,10 +9,14 @@ namespace Tripz.AppLogic.Services
     public class TripService : ITripService
     {
         private readonly ITripRepository _tripRepository;
+        private readonly ITripMapper _tripMapper;
+        private readonly ITripFactory _tripFactory;
 
-        public TripService(ITripRepository tripRepository)
+        public TripService(ITripRepository tripRepository, ITripMapper tripMapper, ITripFactory tripFactory)
         {
             _tripRepository = tripRepository;
+            _tripMapper = tripMapper;
+            _tripFactory = tripFactory;
         }
 
         public async Task<IEnumerable<TripDto>> GetTripsAsync(GetTripsQuery query)
@@ -46,19 +47,7 @@ namespace Tripz.AppLogic.Services
                 filtered = filtered.Where(t => t.DepartureDate.Year == query.Year.Value);
             }
 
-            return filtered.Select(t => new TripDto
-            {
-                Id = t.Id,
-                EmployeeId = t.User.Id.ToString(),
-                EmployeeName = t.User.Nickname,
-                TransportType = t.TransportType.ToString(),
-                DepartureDate = t.DepartureDate,
-                ReturnDate = t.ReturnDate,
-                Destination = t.Destination,
-                EstimatedCost = t.EstimatedCost,
-                Status = t.Status.ToString(),
-                SubmittedAt = t.SubmittedAt
-            });
+            return filtered.Select(t => _tripMapper.ToDto(t));
         }
 
         public async Task<TripDto?> GetTripByIdAsync(Guid id)
@@ -68,53 +57,14 @@ namespace Tripz.AppLogic.Services
             if (trip == null)
                 return null;
 
-            return new TripDto
-            {
-                Id = trip.Id,
-                EmployeeId = trip.User.Id.ToString(),
-                EmployeeName = trip.User.Nickname,
-                TransportType = trip.TransportType.ToString(),
-                DepartureDate = trip.DepartureDate,
-                ReturnDate = trip.ReturnDate,
-                Destination = trip.Destination,
-                EstimatedCost = trip.EstimatedCost,
-                Status = trip.Status.ToString(),
-                SubmittedAt = trip.SubmittedAt
-            };
+            return _tripMapper.ToDto(trip);
         }
 
         public async Task<TripDto> CreateTripAsync(CreateTripCommand command)
         {
-            var trip = new Trip
-            {
-                Id = Guid.NewGuid(),
-                UserId = command.UserId,
-                TransportType = command.TransportType,
-                DepartureDate = command.DepartureDate,
-                ReturnDate = command.ReturnDate,
-                Destination = command.Destination,
-                Distance = command.Distance,
-                Purpose = command.Purpose,
-                EstimatedCost = command.EstimatedCost,
-                Status = TripStatus.Submitted,
-                SubmittedAt = DateTime.UtcNow
-            };
-
+            var trip = _tripFactory.CreateFromCommand(command);
             var createdTrip = await _tripRepository.CreateTripAsync(trip);
-
-            return new TripDto
-            {
-                Id = createdTrip.Id,
-                EmployeeId = createdTrip.User.Id.ToString(),
-                EmployeeName = createdTrip.User.Nickname,
-                TransportType = createdTrip.TransportType.ToString(),
-                DepartureDate = createdTrip.DepartureDate,
-                ReturnDate = createdTrip.ReturnDate,
-                Destination = createdTrip.Destination,
-                EstimatedCost = createdTrip.EstimatedCost,
-                Status = createdTrip.Status.ToString(),
-                SubmittedAt = createdTrip.SubmittedAt
-            };
+            return _tripMapper.ToDto(createdTrip);
         }
 
         public async Task<TripDto?> ApproveTripAsync(ApproveTripCommand command)
@@ -139,39 +89,14 @@ namespace Tripz.AppLogic.Services
 
             await _tripRepository.UpdateTripAsync(trip);
 
-            return new TripDto
-            {
-                Id = trip.Id,
-                EmployeeId = trip.User.Id.ToString(),
-                EmployeeName = trip.User.Nickname,
-                TransportType = trip.TransportType.ToString(),
-                DepartureDate = trip.DepartureDate,
-                ReturnDate = trip.ReturnDate,
-                Destination = trip.Destination,
-                EstimatedCost = trip.EstimatedCost,
-                Status = trip.Status.ToString(),
-                Reason = trip.Reason,
-                SubmittedAt = trip.SubmittedAt
-            };
+            return _tripMapper.ToDto(trip);
         }
 
         public async Task<IEnumerable<TripDto>> GetTripsForEmployeeAsync(int employeeId)
         {
             var trips = await _tripRepository.GetTripsForEmployeeAsync(employeeId);
 
-            return trips.Select(t => new TripDto
-            {
-                Id = t.Id,
-                EmployeeId = t.User.Id.ToString(),
-                EmployeeName = t.User.Nickname,
-                TransportType = t.TransportType.ToString(),
-                DepartureDate = t.DepartureDate,
-                ReturnDate = t.ReturnDate,
-                Destination = t.Destination,
-                EstimatedCost = t.EstimatedCost,
-                Status = t.Status.ToString(),
-                SubmittedAt = t.SubmittedAt
-            });
+            return trips.Select(t => _tripMapper.ToDto(t));
         }
 
         public async Task<ReimbursementSummaryDto> GetReimbursementSummaryAsync(GetTripsQuery query)
