@@ -34,6 +34,8 @@ namespace Tripz.Infrastructure.Data
                 entity.Property(e => e.EstimatedCost).HasPrecision(18, 2);
                 entity.Property(e => e.Purpose).IsRequired().HasMaxLength(500);
                 
+                entity.Ignore(e => e.State);
+                
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.Trips)
                     .HasForeignKey(e => e.UserId)
